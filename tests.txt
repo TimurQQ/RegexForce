@@ -1,0 +1,6 @@
+aa|qq|aq|qa
+(ab|aa|b|ca|ddddd)(c|d|cd)
+(m|e)(p|h)i*
+(a|b)*c
+[1-9][a-h]
+[1-9]*([a-h])*
