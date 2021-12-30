@@ -31,6 +31,7 @@ public class SyntaxTree {
     private void buildBinaryTree(String regexString) {
         int len = regexString.length();
         for (int i = 0; i < len; i++) {
+            System.out.println(opStack);
             if (isSymbol(regexString.charAt(i))) {
                 this.pushNode(regexString.charAt(i));
             } else if (opStack.isEmpty() || regexString.charAt(i) == '(') opStack.push(regexString.charAt(i));
@@ -38,7 +39,7 @@ public class SyntaxTree {
                 while (opStack.peek() != '(') this.operate();
                 opStack.pop();
             } else {
-                if (this.priority(opStack.peek(), regexString.charAt(i))) this.operate();
+                while (this.priority(opStack.peek(), regexString.charAt(i))) this.operate();
                 opStack.push(regexString.charAt(i));
             }
         }
