@@ -4,3 +4,6 @@ aa|qq|aq|qa
 (a|b)*c
 [1-9][a-h]
 [1-9]*([a-h])*
+(a*q|q*a|aa*|qq*)
+aa*|qq*
+\*a*\(\)\((a|b)\)

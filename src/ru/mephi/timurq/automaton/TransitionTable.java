@@ -14,14 +14,14 @@ public class TransitionTable {
         }
     }
 
-    protected Map<Character, Set<DFAState>> getPossibleTransitions(DFAState state) {
+    protected Map<String, Set<DFAState>> getPossibleTransitions(DFAState state) {
         if (table.containsKey(state))
             return table.get(state).moves;
         else
             return new HashMap<>();
     }
 
-    protected DFAState getGoalFromTransition(DFAState start, Character c) {
+    protected DFAState getGoalFromTransition(DFAState start, String c) {
         return getPossibleTransitions(start).get(c).iterator().next();
     }
 

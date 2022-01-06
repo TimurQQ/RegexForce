@@ -7,26 +7,26 @@ import java.util.Set;
 
 public class Transition {
     private final DFAState state;
-    protected Map<Character, Set<DFAState>> moves = new HashMap<>();
+    protected Map<String, Set<DFAState>> moves = new HashMap<>();
 
     public DFAState getState() {
         return state;
     }
 
-    public Transition(DFAState state, Character c, Set<DFAState> states) {
+    public Transition(DFAState state, String symb, Set<DFAState> states) {
         this.state = state;
-        moves.put(c, states);
+        moves.put(symb, states);
     }
 
-    public void addMove(Character c, Set<DFAState> states) {
-        if (!moves.containsKey(c))
-            moves.put(c, states);
+    public void addMove(String symb, Set<DFAState> states) {
+        if (!moves.containsKey(symb))
+            moves.put(symb, states);
         else
-            moves.get(c).addAll(states);
+            moves.get(symb).addAll(states);
     }
 
     public void addTransition(Transition t) {
-        for (Map.Entry<Character, Set<DFAState>> entry : t.moves.entrySet()) {
+        for (Map.Entry<String, Set<DFAState>> entry : t.moves.entrySet()) {
             if (!moves.containsKey(entry.getKey())) {
                 moves.put(entry.getKey(), entry.getValue());
             } else {
@@ -38,7 +38,7 @@ public class Transition {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Character, Set<DFAState>> move : moves.entrySet())
+        for (Map.Entry<String, Set<DFAState>> move : moves.entrySet())
             sb.append(String.format("[%s] x '%s' → %s\t", state, move.getKey(), Arrays.toString(move.getValue().toArray())));
         return sb.toString().trim();
     }

@@ -10,7 +10,7 @@ public class DFAState {
     private static int nextID = 0;
     private String nickname = null;
     private Set<Integer> name = null;
-    private final Map<Character, DFAState> transitions = new HashMap<>();
+    private final Map<String, DFAState> transitions = new HashMap<>();
     private Set<DFAState> includedStates = new HashSet<>();
     private Set<Integer> includedIds = new HashSet<>();
     private boolean isStartState = false;
@@ -22,10 +22,11 @@ public class DFAState {
         this.name = name;
     }
 
-    public DFAState(String nickname, boolean isInitial, boolean isFinal, Set<DFAState> includedStates) {
+    public DFAState(String nickname, boolean isInitial, boolean isFinal, boolean isTrap, Set<DFAState> includedStates) {
         this(nickname);
         this.isStartState = isInitial;
         this.isFinalState = isFinal;
+        this.isTrap = isTrap;
         this.includedStates.addAll(includedStates);
     }
 
@@ -51,7 +52,7 @@ public class DFAState {
         return name;
     }
 
-    public void addTransition(DFAState dState, char sym) {
+    public void addTransition(DFAState dState, String sym) {
         transitions.put(sym, dState);
     }
 
@@ -77,7 +78,7 @@ public class DFAState {
         return nextID++;
     }
 
-    public Map<Character, DFAState> getTransitions() {
+    public Map<String, DFAState> getTransitions() {
         return transitions;
     }
 
@@ -125,32 +126,35 @@ public class DFAState {
             if (this.name != null && temp.name != null) {
                 return this.name.equals(temp.getName());
             } else {
-               return this.nickname != null && this.nickname.equals(temp.nickname);
+                return this.nickname != null && this.nickname.equals(temp.nickname);
             }
         }
     }
 
-    public DFAState getTransition(char sym) {
+    public DFAState getTransition(String sym) {
         return transitions.get(sym);
     }
 
-    public boolean existsTransitions(char x) {
+    public boolean existsTransitions(String x) {
         return transitions.containsKey(x);
     }
 
     public static <T> DFAState mergeStates(Set<T> states) {
         StringBuilder sb = new StringBuilder();
-        boolean neuIsStart = false;
-        boolean neuIsFinal = false;
+        boolean newIsStart = false;
+        boolean newIsFinal = false;
+        boolean newIsTrap = false;
         Set<DFAState> includedStates = new HashSet<>();
         Set<Integer> includedIds = new HashSet<>();
         for (T o : states) {
             if (o instanceof DFAState) {
                 DFAState state = (DFAState) o;
                 if (state.isStart())
-                    neuIsStart = true;
+                    newIsStart = true;
                 if (state.isFinal())
-                    neuIsFinal = true;
+                    newIsFinal = true;
+                if (state.isTrap())
+                    newIsTrap = true;
                 sb.append(state);
                 includedStates.add(state);
             } else if (o instanceof Integer) {
@@ -160,13 +164,13 @@ public class DFAState {
             }
         }
 
-        DFAState neu;
+        DFAState newState;
         if (includedStates.size() > 0)
-            neu = new DFAState(sb.toString(), neuIsStart, neuIsFinal, includedStates);
+            newState = new DFAState(sb.toString(), newIsStart, newIsFinal, newIsTrap, includedStates);
         else
-            neu = new DFAState(sb.toString(), includedIds);
-        System.out.println(neu);
-        return neu;
+            newState = new DFAState(sb.toString(), includedIds);
+        System.out.println(newState);
+        return newState;
     }
 
     @Override

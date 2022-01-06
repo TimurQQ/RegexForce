@@ -12,7 +12,7 @@ public class DFAGraphics extends JFrame {
     private static final long serialVersionUID = 1L;
     private final ArrayList<DFAState> stateList = new ArrayList<>();
     private final int distances;
-    private final Set<Character> symbols;
+    private final Set<String> symbols;
 
     public DFAGraphics(DFA automaton) {
         symbols = new HashSet<>();
@@ -20,7 +20,7 @@ public class DFAGraphics extends JFrame {
         System.out.println(automaton.getStates());
         stateList.addAll(automaton.getStates());
         int size = stateList.size();
-        distances = (1400 / size);
+        distances = (1000 / size);
         this.setSize(1366, 768);
         this.setTitle("DFA");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -35,37 +35,32 @@ public class DFAGraphics extends JFrame {
             Graphics2D canvas2D = (Graphics2D) g;
             int i = 0;
             for (DFAState ds : stateList) {
-                Shape circle = new Ellipse2D.Double(10 + (i) * distances, (int) (726 / 2) - 50, 50, 50);
-                int sign = 1;
+                Shape circle = new Ellipse2D.Double(10 + (i) * distances, (726 >> 1) - 50, 50, 50);
+                int sign;
                 StringBuilder str = new StringBuilder();
                 int de;
                 Set<Integer> tempset = new HashSet<>();
                 boolean flag = true;
-                for (char sym : symbols) {
-//                    System.out.println("EROOORRORO");
-//                    System.out.println(sym);
-//                    System.out.println(ds.getTransitions());
-//                    System.out.println(ds.getNickname());
-//                    System.out.println(ds.getTransition(sym));
+                for (String sym : symbols) {
                     if (ds.getTransition(sym) == null) continue;
                     int x = ds.getTransition(sym).getId();
                     if (x == i) {
                         if (flag) {
-                            Shape arc1 = new Arc2D.Float(35 + (i) * distances, (int) (726 / 2) - (60 + 25), 50, 65, 180, -270, Arc2D.OPEN);
+                            Shape arc1 = new Arc2D.Float(35 + (i) * distances, (726 >> 1) - (60 + 25), 50, 65, 180, -270, Arc2D.OPEN);
                             canvas2D.draw(arc1);
                             flag = false;
                         }
-                        str.append(" ").append(sym);
+                        str.append(" ").append((sym.charAt(0) == '\\') ? sym.charAt(1) : sym);
                     } else {
                         tempset.add(x - i);
                         de = Math.abs(x - i);
                         if (x - i < 0) {
                             sign = 1;
-                            Shape arc = new Arc2D.Float(35 + (i) * distances + (x - i) * distances, (int) (726 / 2) - (100 - (sign) * 25) - (sign) * 20 * de, Math.abs((x - i) * distances), 150 + 40 * de, 0, -180, Arc2D.OPEN);
+                            Shape arc = new Arc2D.Float(35 + (i) * distances + (x - i) * distances, (726 >> 1) - (100 - (sign) * 25) - (sign) * 20 * de, Math.abs((x - i) * distances), 150 + 40 * de, 0, -180, Arc2D.OPEN);
                             canvas2D.draw(arc);
                         } else if (i - x < 0) {
                             sign = -1;
-                            Shape arc = new Arc2D.Float(35 + (i) * distances, (int) (726 / 2) - (100 - (sign) * 25) + (sign) * 20 * de, Math.abs((x - i) * distances), 150 + 40 * de, 0, 180, Arc2D.OPEN);
+                            Shape arc = new Arc2D.Float(35 + (i) * distances, (726 >> 1) - (100 - (sign) * 25) + (sign) * 20 * de, Math.abs((x - i) * distances), 150 + 40 * de, 0, 180, Arc2D.OPEN);
                             canvas2D.draw(arc);
                         }
                     }
@@ -75,10 +70,10 @@ public class DFAGraphics extends JFrame {
                     int x1 = 1;
                     de = Math.abs(diff);
                     if (diff < 0) x1 = -1;
-                    for (char sym : symbols) {
+                    for (String sym : symbols) {
                         if (ds.getTransition(sym) == null) continue;
                         if (ds.getTransition(sym).getId() == diff + i) {
-                            str2.append(" ").append(sym);
+                            str2.append(" ").append((sym.charAt(0) == '\\') ? sym.charAt(1) : sym);
                         }
                     }
                     canvas2D.setFont(new Font("TimesRoman", Font.PLAIN, 25));

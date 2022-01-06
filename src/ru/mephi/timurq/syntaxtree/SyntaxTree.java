@@ -1,10 +1,13 @@
 package ru.mephi.timurq.syntaxtree;
 
 import ru.mephi.timurq.lang.OperatorsSet;
-import ru.mephi.timurq.regex.RegExp;
 import ru.mephi.timurq.lang.SymbolSet;
+import ru.mephi.timurq.regex.RegExp;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.Stack;
 
 public class SyntaxTree {
     private int leafNodeId = 0;
@@ -30,10 +33,22 @@ public class SyntaxTree {
 
     private void buildBinaryTree(String regexString) {
         int len = regexString.length();
+        // Flag which is true when there is something like: \( or \* or etc
+        boolean isEscaped = false;
         for (int i = 0; i < len; i++) {
-            System.out.println(opStack);
-            if (isSymbol(regexString.charAt(i))) {
-                this.pushNode(regexString.charAt(i));
+            if (regexString.charAt(i) == '\\' && !isEscaped) {
+                isEscaped = true;
+                continue;
+            }
+            if (isSymbol(regexString.charAt(i)) || isEscaped) {
+                if (isEscaped) {
+                    //create a node with "\{symbol}" symbol
+                    this.pushNode("\\" + regexString.charAt(i));
+                }
+                else{
+                    this.pushNode(Character.toString(regexString.charAt(i)));
+                }
+                isEscaped = false;
             } else if (opStack.isEmpty() || regexString.charAt(i) == '(') opStack.push(regexString.charAt(i));
             else if (regexString.charAt(i) == ')') {
                 while (opStack.peek() != '(') this.operate();
@@ -147,6 +162,10 @@ public class SyntaxTree {
         }
     }
 
+    private boolean isSymbol(String symb) {
+        return symbolSet.contains(symb.charAt(0)) && !opSet.contains(symb.charAt(0)) || symb.charAt(0) == '\\';
+    }
+
     private boolean isSymbol(char ch) {
         return symbolSet.contains(ch) && !opSet.contains(ch);
     }
@@ -184,7 +203,7 @@ public class SyntaxTree {
     private void union() {
         Node right = nodeStack.pop();
         Node left = nodeStack.pop();
-        Node newRoot = pushNode('|');
+        Node newRoot = pushNode("|");
         newRoot.setLeft(left);
         newRoot.setRight(right);
         root = newRoot;
@@ -193,7 +212,7 @@ public class SyntaxTree {
     private void concat() {
         Node right = nodeStack.pop();
         Node left = nodeStack.pop();
-        Node newRoot = pushNode('&');
+        Node newRoot = pushNode("&");
         newRoot.setLeft(left);
         newRoot.setRight(right);
         root = newRoot;
@@ -201,38 +220,38 @@ public class SyntaxTree {
 
     private void closure() {
         Node left = nodeStack.pop();
-        Node newRoot = pushNode('*');
+        Node newRoot = pushNode("*");
         newRoot.setLeft(left);
         root = newRoot;
     }
 
-    private Node pushNode(char id) {
-        if (isSymbol(id)) {
-            LeafNode newNode = new LeafNode(Character.toString(id), ++leafNodeId);
+    private Node pushNode(String symbol) {
+        if (isSymbol(symbol)) {
+            LeafNode newNode = new LeafNode(symbol, ++leafNodeId);
             nodeStack.push(newNode);
             leaves.add(newNode);
             return newNode;
         } else {
-            Node newNode = new Node(Character.toString(id));
+            Node newNode = new Node(symbol);
             nodeStack.push(newNode);
             return newNode;
         }
     }
 
     private void printInOrder(Node node) {
-        if(node!=null) {
+        if (node != null) {
             printInOrder(node.getLeft());
-            System.out.println(node.getSymbol()+":-"+node.getFirstPos()+"(FP);"+node.getLastPos()+"(LP)");
+            System.out.println(node.getSymbol() + ":-" + node.getFirstPos() + "(FP);" + node.getLastPos() + "(LP)");
             printInOrder(node.getRight());
         }
     }
 
     private void printDataFollowPos(Node node) {
-        if(node != null) {
+        if (node != null) {
             printDataFollowPos(node.getLeft());
-            if(node instanceof LeafNode) {
-                LeafNode temp=(LeafNode)node;
-                System.out.println("("+temp.getSymbol()+","+temp.getId()+"):-"+temp.getFollowPos());
+            if (node instanceof LeafNode) {
+                LeafNode temp = (LeafNode) node;
+                System.out.println("(" + temp.getSymbol() + "," + temp.getId() + "):-" + temp.getFollowPos());
             }
             printDataFollowPos(node.getRight());
         }

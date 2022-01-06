@@ -11,7 +11,7 @@ import java.util.*;
 public class DFA {
     protected TransitionTable lambda = new TransitionTable();
     private final List<DFAState> listStates = new ArrayList<>();
-    private final Set<Character> alphabet = new HashSet<>();
+    private final Set<String> alphabet = new HashSet<>();
     private final SymbolSet symbolSet = new SymbolSet();
     private SyntaxTree sTree = null;
     private RegExp regex = null;
@@ -49,15 +49,30 @@ public class DFA {
     }
 
     private void generateAlphabet(String str) {
+        // Flag which is true when there is something like: \( or \* or etc
+        boolean isEscaped = false;
         for (int i = 0; i < str.length(); i++) {
-            if (isSymbol(str.charAt(i))) alphabet.add(str.charAt(i));
+            if (str.charAt(i) == '\\' && !isEscaped) {
+                isEscaped = true;
+                continue;
+            }
+            if (isSymbol(str.charAt(i)) || isEscaped) {
+                if (isEscaped) {
+                    //create a node with "\{symbol}" symbol
+                    alphabet.add("\\" + str.charAt(i));
+                }
+                else{
+                    alphabet.add(Character.toString(str.charAt(i)));
+                }
+                isEscaped = false;
+            }
             else if (str.charAt(i) == '[') {
                 i++;
-                int tem = str.charAt(i);
+                char tem = str.charAt(i);
                 i = i + 2;
-                int tem2 = str.charAt(i);
+                char tem2 = str.charAt(i);
                 while (tem <= tem2) {
-                    alphabet.add((char) tem);
+                    alphabet.add(Character.toString(tem));
                     tem++;
                 }
             }
@@ -72,7 +87,7 @@ public class DFA {
         int size = listStates.size();
         listStates.get(i).setId(i);
         while (i < size) {
-            for (char sym : alphabet) {
+            for (String sym : alphabet) {
                 Set<Integer> temp = this.nextStateName(listStates.get(i).getName(), sym);
                 DFAState ds = new DFAState(temp);
                 if (!listStates.contains(ds)) {
@@ -95,10 +110,10 @@ public class DFA {
         return symbolSet.contains(ch) && !opSet.contains(ch);
     }
 
-    private Set<Integer> nextStateName(Set<Integer> cur, char sym) {
+    private Set<Integer> nextStateName(Set<Integer> cur, String sym) {
         Set<Integer> temp = new HashSet<>();
         for (int i : cur) {
-            if (Objects.requireNonNull(this.getLeaf(i)).getSymbol().charAt(0) == sym)
+            if (Objects.requireNonNull(this.getLeaf(i)).getSymbol().equals(sym))
                 temp.addAll(Objects.requireNonNull(this.getLeaf(i)).getFollowPos());
         }
         return temp;
@@ -111,11 +126,11 @@ public class DFA {
         return null;
     }
 
-    public void addToAlphabet(Character ch) {
+    public void addToAlphabet(String ch) {
         alphabet.add(ch);
     }
 
-    public void addToAlphabet(Collection<Character> alpha) {
+    public void addToAlphabet(Collection<String> alpha) {
         alphabet.addAll(alpha);
     }
 
@@ -131,7 +146,7 @@ public class DFA {
                 System.out.print("F_");
             }
             System.out.print("Q" + ds.getId() + "(" + ds.getName() + "):\r\n");
-            for (char sym : alphabet) {
+            for (String sym : alphabet) {
                 if (ds.existsTransitions(sym)) {
                     System.out.println("D(Q" + ds.getId() + "," + sym + ")= " + "Q" + ds.getTransition(sym).getId() + "(" + ds.getTransition(sym).getName() + ")");
                 }
@@ -142,7 +157,7 @@ public class DFA {
     public void isValidString(String str) {
         int index = 0, i, tmpIndex;
         for (i = 0; i < str.length(); i++) {
-            DFAState temp = listStates.get(index).getTransition(str.charAt(i));
+            DFAState temp = listStates.get(index).getTransition(Character.toString(str.charAt(i)));
             tmpIndex = index;
             index = listStates.indexOf(temp);
             System.out.println("Q" + listStates.get(tmpIndex).getId() + "," + str.charAt(i) + " -> Q" + listStates.get(index).getId());
@@ -158,7 +173,7 @@ public class DFA {
         return listStates;
     }
 
-    public Set<Character> getAlphabet() {
+    public Set<String> getAlphabet() {
         return alphabet;
     }
 
@@ -167,7 +182,7 @@ public class DFA {
         for (DFAState ds : listStates) {
             if (ds.getName().contains(last)) ds.setFinal();
             int i = 0;
-            for (char sym : alphabet) {
+            for (String sym : alphabet) {
                 if (ds.getTransition(sym).equals(ds)) i++;
             }
             if (i == alphabet.size() && !ds.isFinal()) ds.setTrap();
@@ -179,8 +194,8 @@ public class DFA {
         if (dfaMin != null) return dfaMin;
         System.out.println("[*] Building groups\n");
 
-        List<Set<DFAState>> gruppen = buildGroups();
-        System.out.println(gruppen);
+        List<Set<DFAState>> groups = buildGroups();
+        System.out.println(groups);
 
         System.out.println("[*] Groups built\n");
         System.out.println("[*] Building DFA_min\n");
@@ -188,8 +203,8 @@ public class DFA {
         dfaMin.addToAlphabet(this.alphabet);
 
         System.out.println("[*] Creating S_min\n");
-        for (Set<DFAState> gruppe : gruppen) {
-            dfaMin.addState(DFAState.mergeStates(gruppe));
+        for (Set<DFAState> group : groups) {
+            dfaMin.addState(DFAState.mergeStates(group));
         }
 
         System.out.println(dfaMin.getStates());
@@ -208,62 +223,62 @@ public class DFA {
     }
 
     private List<Set<DFAState>> buildGroups() {
-        List<Set<DFAState>> gruppen = new ArrayList<>();
+        List<Set<DFAState>> groups = new ArrayList<>();
         Set<DFAState> endStates = this.getFinalStates();
         Set<DFAState> nonEndStates = new HashSet<>(this.getStates());
         nonEndStates.removeAll(endStates);
         System.out.print("NonEnd states: ");
         System.out.println(nonEndStates);
-        gruppen.add(endStates);
+        groups.add(endStates);
         if (nonEndStates.size() > 0)
-            gruppen.add(nonEndStates);
+            groups.add(nonEndStates);
 
         boolean groupWasSplit;
         int i = 0;
         do {
-            System.out.println("\tΠ" + i++ + " = " + gruppen);
-            List<Set<DFAState>> gruppenNeu = new ArrayList<>();
+            System.out.println("\tΠ" + i++ + " = " + groups);
+            List<Set<DFAState>> newPartition = new ArrayList<>();
             groupWasSplit = false;
-            for (Set<DFAState> gruppe : gruppen) {
-                if (gruppe.size() == 1) {
-                    gruppenNeu.add(gruppe);
+            for (Set<DFAState> group : groups) {
+                if (group.size() == 1) {
+                    newPartition.add(group);
                     continue;
                 }
-                Set<DFAState> alt = new HashSet<>(gruppe);
-                Set<DFAState> neu = new HashSet<>();
+                Set<DFAState> oldGroup = new HashSet<>(group);
+                Set<DFAState> newGroup = new HashSet<>();
 
-                boolean groupNeedstoBeSplit = false;
-                for (Character c : this.alphabet) {
+                boolean groupNeedsToBeSplit = false;
+                for (String c : this.alphabet) {
                     Set<Set<DFAState>> allGoals = new HashSet<>();
 
-                    for (DFAState s : gruppe) {
-                        Set<DFAState> goal = getGroupWhichIncludes(s, c, gruppen);
+                    for (DFAState s : group) {
+                        Set<DFAState> goal = getGroupWhichIncludes(s, c, groups);
                         assert (goal != null);
                         if (allGoals.size() == 0) {
                             allGoals.add(goal);
                         } else if (!allGoals.contains(goal)) {
-                            if (!groupNeedstoBeSplit)
-                                System.out.println("\n\t\tSplitting " + gruppe);
-                            groupNeedstoBeSplit = true;
+                            if (!groupNeedsToBeSplit)
+                                System.out.println("\n\t\tSplitting " + group);
+                            groupNeedsToBeSplit = true;
 
-                            neu.add(s);
-                            alt.remove(s);
+                            newGroup.add(s);
+                            oldGroup.remove(s);
                         }
                     }
                 }
 
-                if (groupNeedstoBeSplit) {
-                    System.out.println(" into " + alt + " and " + neu + "\n");
+                if (groupNeedsToBeSplit) {
+                    System.out.println(" into " + oldGroup + " and " + newGroup + "\n");
                     groupWasSplit = true;
-                    gruppenNeu.add(neu);
+                    newPartition.add(newGroup);
                 }
-                gruppenNeu.add(alt);
+                newPartition.add(oldGroup);
             }
             System.out.println('\n');
-            gruppen = gruppenNeu;
+            groups = newPartition;
 
         } while (groupWasSplit);
-        return gruppen;
+        return groups;
     }
 
     protected Set<DFAState> getFinalStates() {
@@ -275,12 +290,12 @@ public class DFA {
         return finalState;
     }
 
-    private Set<DFAState> getGroupWhichIncludes(DFAState state, Character c, List<Set<DFAState>> gruppen) {
+    private Set<DFAState> getGroupWhichIncludes(DFAState state, String  sym, List<Set<DFAState>> groups) {
         Set<DFAState> result = null;
-        state = lambda.getGoalFromTransition(state, c);
-        for (Set<DFAState> gruppe : gruppen) {
-            if (gruppe.contains(state)) {
-                result = gruppe;
+        state = lambda.getGoalFromTransition(state, sym);
+        for (Set<DFAState> group : groups) {
+            if (group.contains(state)) {
+                result = group;
                 break;
             }
         }
@@ -292,12 +307,8 @@ public class DFA {
         for (int i = 0; i < states.size(); ++i) {
             DFAState s = states.get(i);
             DFAState start = s.getIncludedStates().iterator().next();
-            for (Character c : this.alphabet) {
+            for (String c : this.alphabet) {
                 DFAState goal = findStateWithIncludedState(lambda.getGoalFromTransition(start, c), new HashSet<>(states));
-                if (c == 'm') {
-                    System.out.print("GOAL_M:");
-                    System.out.println(lambda.getGoalFromTransition(start, c));
-                }
                 if (goal != null) {
                     result.addTransition(new Transition(s, c, goal.asSet()));
                     s.addTransition(goal, c);
@@ -319,7 +330,7 @@ public class DFA {
         return result;
     }
 
-    public Map<Character, Set<DFAState>> getPossibleTransitions(DFAState state) {
+    public Map<String, Set<DFAState>> getPossibleTransitions(DFAState state) {
         return lambda.getPossibleTransitions(state);
     }
 

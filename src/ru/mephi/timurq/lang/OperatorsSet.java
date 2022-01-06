@@ -8,7 +8,7 @@ public class OperatorsSet {
     private final List<Character> operators;
 
     public OperatorsSet() {
-        operators = new ArrayList<>(Arrays.asList('(', ')', '*', '&', '|'));
+        operators = new ArrayList<>(Arrays.asList('(', ')', '*', '&', '|', '[', ']'));
     }
 
     public List<Character> getOperators() {
