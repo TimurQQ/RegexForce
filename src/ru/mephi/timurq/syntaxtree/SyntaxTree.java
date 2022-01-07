@@ -44,15 +44,14 @@ public class SyntaxTree {
                 if (isEscaped) {
                     //create a node with "\{symbol}" symbol
                     this.pushNode("\\" + regexString.charAt(i));
-                }
-                else{
+                } else {
                     this.pushNode(Character.toString(regexString.charAt(i)));
                 }
                 isEscaped = false;
             } else if (opStack.isEmpty() || regexString.charAt(i) == '(') opStack.push(regexString.charAt(i));
             else if (regexString.charAt(i) == ')') {
                 while (opStack.peek() != '(') this.operate();
-                opStack.pop();
+                this.operate();
             } else {
                 while (this.priority(opStack.peek(), regexString.charAt(i))) this.operate();
                 opStack.push(regexString.charAt(i));
@@ -77,6 +76,8 @@ public class SyntaxTree {
             if (root.getLeft().isNullable() || root.getRight().isNullable()) root.setNullable(true);
         } else if (root.getSymbol().charAt(0) == '&') {
             if (root.getLeft().isNullable() && root.getRight().isNullable()) root.setNullable(true);
+        } else if (root.getSymbol().equals("()")) {
+            if (root.getLeft().isNullable()) root.setNullable(true);
         } else if (root.getSymbol().charAt(0) == '*') {
             root.setNullable(true);
         }
@@ -95,7 +96,6 @@ public class SyntaxTree {
             Set<Integer> tempSetRight = root.getRight().getFirstPos();
             root.addAllToFirstPos(tempSetLeft);
             root.addAllToFirstPos(tempSetRight);
-
         } else if (root.getSymbol().charAt(0) == '&') {
             Set<Integer> tempSetLeft = root.getLeft().getFirstPos();
             if (root.getLeft().isNullable()) {
@@ -107,6 +107,9 @@ public class SyntaxTree {
             }
 
         } else if (root.getSymbol().charAt(0) == '*') {
+            Set<Integer> tempSetLeft = root.getLeft().getFirstPos();
+            root.addAllToFirstPos(tempSetLeft);
+        } else if (root.getSymbol().equals("()")) {
             Set<Integer> tempSetLeft = root.getLeft().getFirstPos();
             root.addAllToFirstPos(tempSetLeft);
         }
@@ -137,12 +140,15 @@ public class SyntaxTree {
         } else if (root.getSymbol().charAt(0) == '*') {
             Set<Integer> tempSetLeft = root.getLeft().getLastPos();
             root.addAllToLastPos(tempSetLeft);
+        } else if (root.getSymbol().equals("()")) {
+            Set<Integer> tempSetLeft = root.getLeft().getLastPos();
+            root.addAllToLastPos(tempSetLeft);
         }
     }
 
     private void genFollowPos(Node root) {
         if (root == null || root instanceof LeafNode) return;
-        if (root.getSymbol().charAt(0) == '|') {
+        if (root.getSymbol().charAt(0) == '|' || root.getSymbol().equals("()")) {
             genFollowPos(root.getLeft());
             genFollowPos(root.getRight());
         } else {
@@ -198,6 +204,7 @@ public class SyntaxTree {
         if (sw == '|') union();
         else if (sw == '&') concat();
         else if (sw == '*') closure();
+        else if (sw == '(') makeGroup();
     }
 
     private void union() {
@@ -221,6 +228,13 @@ public class SyntaxTree {
     private void closure() {
         Node left = nodeStack.pop();
         Node newRoot = pushNode("*");
+        newRoot.setLeft(left);
+        root = newRoot;
+    }
+
+    private void makeGroup() {
+        Node left = nodeStack.pop();
+        Node newRoot = pushNode("()");
         newRoot.setLeft(left);
         root = newRoot;
     }

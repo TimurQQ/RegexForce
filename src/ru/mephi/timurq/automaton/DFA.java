@@ -60,13 +60,11 @@ public class DFA {
                 if (isEscaped) {
                     //create a node with "\{symbol}" symbol
                     alphabet.add("\\" + str.charAt(i));
-                }
-                else{
+                } else {
                     alphabet.add(Character.toString(str.charAt(i)));
                 }
                 isEscaped = false;
-            }
-            else if (str.charAt(i) == '[') {
+            } else if (str.charAt(i) == '[') {
                 i++;
                 char tem = str.charAt(i);
                 i = i + 2;
@@ -185,7 +183,8 @@ public class DFA {
             for (String sym : alphabet) {
                 if (ds.getTransition(sym).equals(ds)) i++;
             }
-            if (i == alphabet.size() && !ds.isFinal()) ds.setTrap();
+            if ((i == alphabet.size()) && ds.isFinal()) ds.setGood();
+            if ((i == alphabet.size()) && !ds.isFinal()) ds.setTrap();
         }
     }
 
@@ -219,7 +218,19 @@ public class DFA {
         dfaMin.renameStates();
 
         System.out.println("[*] Done\n");
+        dfaMin.sTree = sTree;
+        dfaMin.regex = regex;
         return dfaMin;
+    }
+
+    public DFA getComplement() {
+        System.out.println(regex);
+        sTree.print();
+        DFA newDFA = new DFA(regex, sTree).minimize();
+        for (DFAState p : newDFA.getStates()) {
+            p.reverseState();
+        }
+        return newDFA;
     }
 
     private List<Set<DFAState>> buildGroups() {
@@ -290,7 +301,7 @@ public class DFA {
         return finalState;
     }
 
-    private Set<DFAState> getGroupWhichIncludes(DFAState state, String  sym, List<Set<DFAState>> groups) {
+    private Set<DFAState> getGroupWhichIncludes(DFAState state, String sym, List<Set<DFAState>> groups) {
         Set<DFAState> result = null;
         state = lambda.getGoalFromTransition(state, sym);
         for (Set<DFAState> group : groups) {
@@ -360,7 +371,7 @@ public class DFA {
         }
     }
 
-    protected DFAState getStartState() {
+    public DFAState getStartState() {
         DFAState result = null;
         for (DFAState s : listStates) {
             if (s.isStart()) {

@@ -2,6 +2,7 @@ package ru.mephi.timurq;
 
 import ru.mephi.timurq.automaton.DFA;
 import ru.mephi.timurq.automaton.DFAGraphics;
+import ru.mephi.timurq.automaton.DFAState;
 import ru.mephi.timurq.syntaxtree.SyntaxTree;
 
 import java.io.BufferedReader;
@@ -22,14 +23,15 @@ public class Application {
             if (choiceA == 1) {
                 System.out.println("Enter the regEx in string format:-->");
                 str = console.readLine();
-                while (choiceB != 6) {
+                while (choiceB != 7) {
                     System.out.println(
                             "1.Generate Syntax Tree\n" +
                                     "2.Generate DFA transitions table\n" +
                                     "3.Check String\n" +
                                     "4.Generate DFA State Diagram (Graphics)\n" +
                                     "5.Generate minDFA\n" +
-                                    "6.Exit"
+                                    "6.Get Complement of this Lang\n" +
+                                    "7.Exit"
                     );
                     choiceB = Integer.parseInt(console.readLine());
                     switch (choiceB) {
@@ -59,11 +61,20 @@ public class Application {
                             break;
                         }
                         case 5: {
+                            DFAState.resetIds();
                             DFA automaton = new DFA(str);
                             DFA minDFA = automaton.minimize();
                             new DFAGraphics(minDFA);
+                            break;
                         }
                         case 6: {
+                            DFAState.resetIds();
+                            DFA automaton = new DFA(str);
+                            DFA minDFAComplement = automaton.getComplement();
+                            new DFAGraphics(minDFAComplement);
+                            break;
+                        }
+                        case 7: {
                             System.out.println("----BACK TO MAIN MENU----");
                             break;
                         }

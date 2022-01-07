@@ -90,6 +90,8 @@ public class DFAGraphics extends JFrame {
                 canvas2D.setFont(new Font("TimesRoman", Font.PLAIN, 25));
                 canvas2D.drawString(str.toString(), 45 + (i) * distances, (726 >> 1) - 60);
                 canvas2D.draw(circle);
+                System.out.println(ds.isFinal());
+                System.out.println(ds.isTrap());
                 if (ds.isFinal()) {
                     canvas2D.setColor(Color.BLUE);
                     Shape circle2 = new Ellipse2D.Double(5 + (i) * distances, (726 >> 1) - 55, 60, 60);

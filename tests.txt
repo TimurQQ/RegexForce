@@ -7,3 +7,9 @@ aa|qq|aq|qa
 (a*q|q*a|aa*|qq*)
 aa*|qq*
 \*a*\(\)\((a|b)\)
+\*a*\(\)\((aa|qq|aq|qa)\)
+(abc***ab**a*)
+(a***b**c*)
+(a***b**c*)*
+((aaa)***(aa)**(a)*)*
+[1-9][a-h]\[1-9\]
