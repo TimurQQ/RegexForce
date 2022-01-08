@@ -194,7 +194,7 @@ public class DFA {
         System.out.println("[*] Building groups\n");
 
         List<Set<DFAState>> groups = buildGroups();
-        System.out.println(groups);
+        //System.out.println(groups);
 
         System.out.println("[*] Groups built\n");
         System.out.println("[*] Building DFA_min\n");
@@ -206,18 +206,19 @@ public class DFA {
             dfaMin.addState(DFAState.mergeStates(group));
         }
 
-        System.out.println(dfaMin.getStates());
-
-        System.out.println("[*] Creating δ_min\n");
+        //System.out.println("[*] Creating δ_min\n");
         dfaMin.lambda = createLambda(dfaMin.getStates());
+        System.out.println("DEBUG");
+        System.out.println(dfaMin.getStates().size());
 
-        System.out.println(dfaMin.lambda);
-        System.out.println(dfaMin.listStates);
+        //System.out.println(dfaMin.lambda);
+        //System.out.println(dfaMin.listStates);
 
-        System.out.println("[*] Renaming States\n");
+        //System.out.println("[*] Renaming States\n");
         dfaMin.renameStates();
+        System.out.println(dfaMin.getStates().size());
 
-        System.out.println("[*] Done\n");
+        //System.out.println("[*] Done\n");
         dfaMin.sTree = sTree;
         dfaMin.regex = regex;
         return dfaMin;
@@ -230,7 +231,7 @@ public class DFA {
         for (DFAState p : newDFA.getStates()) {
             p.reverseState();
         }
-        System.out.println(newDFA.getStates());
+        //System.out.println(newDFA.getStates());
         DFAState.resetIds();
         newDFA.addToAlphabet(universum);
         return newDFA;
@@ -357,7 +358,7 @@ public class DFA {
                     s.addTransition(goal, c);
                 }
             }
-            System.out.println(s.getTransitions());
+            //System.out.println(s.getTransitions());
         }
         return result;
     }

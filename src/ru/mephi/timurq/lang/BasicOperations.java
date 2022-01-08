@@ -24,7 +24,6 @@ public class BasicOperations {
     static private DFA dfaIntersection(DFA a1, DFA a2) {
         DFA c = new DFA();
         c.addToAlphabet(a1.getAlphabet());
-        DFAState.resetIds();
         List<StatePair> generatedStates = new ArrayList<>();
         StatePair startStatePair = new StatePair(a1.getStartState(), a2.getStartState());
         c.addState(DFAState.mergePair(startStatePair));
@@ -34,14 +33,8 @@ public class BasicOperations {
             Set<DFAState> curStateSet = Set.of(curStatePair.getFirstState(), curStatePair.getSecondState());
             DFAState start = findStateWithIncludePair(curStateSet, new HashSet<>(c.getStates()));
             for (String sym : c.getAlphabet()) {
-                int index1 = a1.getStates().indexOf(curStatePair.getFirstState());
-                int index2 = a2.getStates().indexOf(curStatePair.getSecondState());
-                DFAState goal1 = a1.getStates().get(index1).getTransition(sym);
-                DFAState goal2 = a2.getStates().get(index2).getTransition(sym);
-                index1 = a1.getStates().indexOf(goal1);
-                index2 = a2.getStates().indexOf(goal2);
-                goal1 = a1.getStates().get(index1);
-                goal2 = a2.getStates().get(index2);
+                DFAState goal1 = curStatePair.getFirstState().getTransition(sym);
+                DFAState goal2 = curStatePair.getSecondState().getTransition(sym);
                 StatePair newStatePair = new StatePair(goal1, goal2);
                 Set<DFAState> newStateSet = Set.of(goal1, goal2);
                 if (!generatedStates.contains(newStatePair)) {
@@ -54,8 +47,8 @@ public class BasicOperations {
             }
         }
         c.renameStates();
-        c.minimize();
-        return c;
+        DFAState.resetIds();
+        return c.minimize();
     }
 
     private static DFAState findStateWithIncludePair(Set<DFAState> s, Set<DFAState> states) {

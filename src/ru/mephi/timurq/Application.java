@@ -95,12 +95,12 @@ public class Application {
                         }
                         case 8: {
                             DFAState.resetIds();
-                            DFA a1 = new DFA("(a|b)*c");
-                            new DFAGraphics(a1, "DFA_1 (a1) Regex:\"" + "(a|b)*c" +"\"");
+                            DFA a1 = new DFA("(a|b|d)*c");
+                            new DFAGraphics(a1, "DFA_1 (a1) Regex:\"" + "(a|b)*c" + "\"");
                             DFA a2 = new DFA("baac*");
-                            new DFAGraphics(a2, "DFA_2 (a2) Regex:\"" + "baac*" +"\"");
+                            new DFAGraphics(a2, "DFA_2 (a2) Regex:\"" + "baac*" + "\"");
                             DFA c = BasicOperations.minus(a1, a2);
-                            new DFAGraphics(c, "DFA_3 (a1\\a2) a1: \"" + "(a|b)*c" + "\" a2: \"" + "baac*\"" );
+                            new DFAGraphics(c, "DFA_3 (a1\\a2) a1: \"" + "(a|b)*c" + "\" a2: \"" + "baac*\"" + " (minimized)");
                         }
                         case 9: {
                             System.out.println("----BACK TO MAIN MENU----");
