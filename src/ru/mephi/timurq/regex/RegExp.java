@@ -88,12 +88,4 @@ public class RegExp {
     public String getInitialValue() {
         return initialValue;
     }
-
-    public SymbolSet getSymbolSet() {
-        return symbolSet;
-    }
-
-    public OperatorsSet getOpSet() {
-        return opSet;
-    }
 }

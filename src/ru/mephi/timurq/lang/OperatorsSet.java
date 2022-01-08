@@ -11,10 +11,6 @@ public class OperatorsSet {
         operators = new ArrayList<>(Arrays.asList('(', ')', '*', '&', '|', '[', ']'));
     }
 
-    public List<Character> getOperators() {
-        return operators;
-    }
-
     public boolean contains(char ch) {
         return operators.contains(ch);
     }

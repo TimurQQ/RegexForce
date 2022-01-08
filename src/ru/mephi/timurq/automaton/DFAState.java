@@ -6,13 +6,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class DFAState {
-    private int id;
+    private long id;
     private static int nextID = 0;
     private String nickname = null;
     private Set<Integer> name = null;
     private final Map<String, DFAState> transitions = new HashMap<>();
-    private Set<DFAState> includedStates = new HashSet<>();
-    private Set<Integer> includedIds = new HashSet<>();
+    private final Set<DFAState> includedStates = new HashSet<>();
     private boolean isStartState = false;
     private boolean isFinalState = false;
     private boolean isTrap = false;
@@ -32,18 +31,9 @@ public class DFAState {
         this.includedStates.addAll(includedStates);
     }
 
-    public DFAState(String nickname, Set<Integer> includedIds) {
-        this(nickname);
-        this.includedIds = includedIds;
-    }
-
     public DFAState(String nickname) {
         this.nickname = nickname;
         this.id = getNextID();
-    }
-
-    public DFAState() {
-        name = new HashSet<>();
     }
 
     public Set<DFAState> getIncludedStates() {
@@ -58,7 +48,7 @@ public class DFAState {
         transitions.put(sym, dState);
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -68,10 +58,6 @@ public class DFAState {
 
     public static void resetIds() {
         nextID = 0;
-    }
-
-    public String getNickname() {
-        return nickname;
     }
 
     public Set<DFAState> asSet() {
@@ -88,6 +74,10 @@ public class DFAState {
         return transitions;
     }
 
+    public void addIncludedState(DFAState s) {
+        includedStates.add(s);
+    }
+
     public boolean isStart() {
         return isStartState;
     }
@@ -97,8 +87,7 @@ public class DFAState {
         if (isTrap) {
             isTrap = false;
             isGood = true;
-        }
-        if (isGood) {
+        } else if (isGood) {
             isTrap = true;
             isGood = false;
         }
@@ -166,39 +155,60 @@ public class DFAState {
         return transitions.containsKey(x);
     }
 
-    public static <T> DFAState mergeStates(Set<T> states) {
+    public static DFAState mergePair(StatePair states) {
         StringBuilder sb = new StringBuilder();
         boolean newIsStart = false;
         boolean newIsFinal = false;
         boolean newIsTrap = false;
         boolean newIsGood = false;
         Set<DFAState> includedStates = new HashSet<>();
-        Set<Integer> includedIds = new HashSet<>();
-        for (T o : states) {
-            if (o instanceof DFAState) {
-                DFAState state = (DFAState) o;
-                if (state.isStart())
-                    newIsStart = true;
-                if (state.isFinal())
-                    newIsFinal = true;
-                if (state.isTrap())
-                    newIsTrap = true;
-                if (state.isGood())
-                    newIsGood = true;
-                sb.append(state);
-                includedStates.add(state);
-            } else if (o instanceof Integer) {
-                Integer id = (Integer) o;
-                includedIds.add(id);
-                sb.append(id);
-            }
+        if (states.s1.isStart() && states.s2.isStart()) {
+            newIsStart = true;
+        }
+        if (states.s1.isFinal() && states.s2.isFinal()) {
+            newIsFinal = true;
+        }
+        if (states.s1.isTrap() || states.s2.isTrap()) {
+            newIsTrap = true;
+        }
+        if (states.s1.isGood() && states.s2.isGood()) {
+            newIsGood = true;
+        }
+        sb.append(states.s1);
+        includedStates.add(states.s1);
+        sb.append(states.s2);
+        includedStates.add(states.s2);
+        DFAState newState;
+        newState = new DFAState(sb.toString(), newIsStart, newIsFinal, newIsTrap, newIsGood, includedStates);
+        System.out.println(newState);
+        return newState;
+    }
+
+    public static DFAState mergeStates(Set<DFAState> states) {
+        StringBuilder sb = new StringBuilder();
+        boolean newIsStart = false;
+        boolean newIsFinal = false;
+        boolean newIsTrap = false;
+        boolean newIsGood = false;
+        Set<DFAState> includedStates = new HashSet<>();
+        for (DFAState state : states) {
+            if (state.isStart())
+                newIsStart = true;
+            if (state.isFinal())
+                newIsFinal = true;
+            if (state.isTrap())
+                newIsTrap = true;
+            if (state.isGood())
+                newIsGood = true;
+            sb.append(state);
+            includedStates.add(state);
         }
 
         DFAState newState;
         if (includedStates.size() > 0)
             newState = new DFAState(sb.toString(), newIsStart, newIsFinal, newIsTrap, newIsGood, includedStates);
         else
-            newState = new DFAState(sb.toString(), includedIds);
+            newState = new DFAState(sb.toString());
         System.out.println(newState);
         return newState;
     }
@@ -220,7 +230,7 @@ public class DFAState {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (id ^ (id >>> 32));
+        result = prime * result + (int) (id ^ (id >>> 32));
         return result;
     }
 }

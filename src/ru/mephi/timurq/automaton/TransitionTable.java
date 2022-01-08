@@ -1,12 +1,11 @@
 package ru.mephi.timurq.automaton;
-
 import java.util.*;
 
 public class TransitionTable {
 
-    private Map<DFAState, Transition> table = new HashMap<>();
+    private final Map<DFAState, Transition> table = new HashMap<>();
 
-    protected void addTransition(Transition t) {
+    public void addTransition(Transition t) {
         if (table.containsKey(t.getState())) {
             table.get(t.getState()).addTransition(t);
         } else {

@@ -1,11 +1,9 @@
 package ru.mephi.timurq.lang;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class SymbolSet {
-    private final List<Character> symbolSet = new ArrayList<>();
+    private final Set<Character> symbolSet = new HashSet<>();
 
     public SymbolSet() {
         for (char ch = 'A'; ch <= 'Z'; ++ch) {
@@ -20,5 +18,9 @@ public class SymbolSet {
 
     public boolean contains(char c) {
         return symbolSet.contains(c);
+    }
+
+    public Set<Character> getSymbols() {
+        return symbolSet;
     }
 }

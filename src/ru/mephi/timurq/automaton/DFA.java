@@ -16,7 +16,6 @@ public class DFA {
     private SyntaxTree sTree = null;
     private RegExp regex = null;
     private final OperatorsSet opSet = new OperatorsSet();
-    private DFA dfaMin = null;
 
     public DFA(RegExp regex, SyntaxTree sTree) {
         this.regex = regex;
@@ -91,13 +90,16 @@ public class DFA {
                 if (!listStates.contains(ds)) {
                     listStates.add(ds);
                     listStates.get(listStates.size() - 1).setId(listStates.size() - 1);
+                    listStates.get(i).addTransition(ds, sym);
+                    Transition t = new Transition(listStates.get(i), sym, ds.asSet());
+                    lambda.addTransition(t);
                 } else {
-                    int in = listStates.indexOf(ds);
-                    ds.setId(in);
+                    int index = listStates.indexOf(ds);
+                    ds.setId(index);
+                    listStates.get(i).addTransition(listStates.get(index), sym);
+                    Transition t = new Transition(listStates.get(i), sym, listStates.get(index).asSet());
+                    lambda.addTransition(t);
                 }
-                listStates.get(i).addTransition(ds, sym);
-                Transition t = new Transition(listStates.get(i), sym, ds.asSet());
-                lambda.addTransition(t);
             }
             i++;
             size = listStates.size();
@@ -122,10 +124,6 @@ public class DFA {
             if (temp.getId() == id) return temp;
         }
         return null;
-    }
-
-    public void addToAlphabet(String ch) {
-        alphabet.add(ch);
     }
 
     public void addToAlphabet(Collection<String> alpha) {
@@ -171,6 +169,10 @@ public class DFA {
         return listStates;
     }
 
+    public boolean isEmpty() {
+        return alphabet.isEmpty();
+    }
+
     public Set<String> getAlphabet() {
         return alphabet;
     }
@@ -189,8 +191,6 @@ public class DFA {
     }
 
     public DFA minimize() {
-
-        if (dfaMin != null) return dfaMin;
         System.out.println("[*] Building groups\n");
 
         List<Set<DFAState>> groups = buildGroups();
@@ -198,7 +198,7 @@ public class DFA {
 
         System.out.println("[*] Groups built\n");
         System.out.println("[*] Building DFA_min\n");
-        dfaMin = new DFA();
+        DFA dfaMin = new DFA();
         dfaMin.addToAlphabet(this.alphabet);
 
         System.out.println("[*] Creating S_min\n");
@@ -223,14 +223,46 @@ public class DFA {
         return dfaMin;
     }
 
-    public DFA getComplement() {
-        System.out.println(regex);
-        sTree.print();
+    public DFA getComplement(Set<String> universum) {
         DFA newDFA = new DFA(regex, sTree).minimize();
+
+        newDFA.totalize(universum);
         for (DFAState p : newDFA.getStates()) {
             p.reverseState();
         }
+        System.out.println(newDFA.getStates());
+        DFAState.resetIds();
+        newDFA.addToAlphabet(universum);
         return newDFA;
+    }
+
+    public DFA getTotal(Set<String> universum) {
+        if (universum.equals(this.alphabet))
+            return this;
+        DFA newDFA = new DFA(regex, sTree).minimize();
+        newDFA.totalize(universum);
+        DFAState.resetIds();
+        newDFA.addToAlphabet(universum);
+        return newDFA;
+    }
+
+    public void totalize(Set<String> universum) {
+        if (universum.equals(this.alphabet)) return;
+        DFAState s = new DFAState("Q~", false, false, true, false, Set.of());
+        s.addIncludedState(s);
+        for (String sym : universum) {
+            lambda.addTransition(new Transition(s, sym, s.asSet()));
+            s.addTransition(s, sym);
+        }
+        for (DFAState p : getStates()) {
+            for (String sym : universum) {
+                if (!p.existsTransitions(sym)) {
+                    lambda.addTransition(new Transition(p, sym, s.asSet()));
+                    p.addTransition(s, sym);
+                }
+            }
+        }
+        addState(s);
     }
 
     private List<Set<DFAState>> buildGroups() {
@@ -328,6 +360,10 @@ public class DFA {
             System.out.println(s.getTransitions());
         }
         return result;
+    }
+
+    public void addTransitionToTable(Transition t) {
+        lambda.addTransition(t);
     }
 
     private DFAState findStateWithIncludedState(DFAState s, Set<DFAState> states) {

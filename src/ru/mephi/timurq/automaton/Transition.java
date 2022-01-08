@@ -8,37 +8,14 @@ import java.util.Set;
 public class Transition {
     private final DFAState state;
     protected Map<String, Set<DFAState>> moves = new HashMap<>();
-    char min;
-    char max;
 
     public DFAState getState() {
         return state;
     }
 
-    public Transition(DFAState state, String symb, Set<DFAState> states) {
+    public Transition(DFAState state, String sym, Set<DFAState> states) {
         this.state = state;
-        moves.put(symb, states);
-    }
-
-    public Transition(DFAState from, char min, char max, DFAState to)	{
-        this.state = from;
-        if (max < min) {
-            char t = max;
-            max = min;
-            min = t;
-        }
-        this.min = min;
-        this.max = max;
-        for (char sym = min; sym <= max; ++sym) {
-            moves.put(Character.toString(sym), to.asSet());
-        }
-    }
-
-    public void addMove(String symb, Set<DFAState> states) {
-        if (!moves.containsKey(symb))
-            moves.put(symb, states);
-        else
-            moves.get(symb).addAll(states);
+        moves.put(sym, states);
     }
 
     public void addTransition(Transition t) {
