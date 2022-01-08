@@ -24,7 +24,7 @@ public class DFAGraphics extends JFrame {
         else distances = (1000 / size);
         this.setSize(1366, 768);
         this.setTitle(title);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.add(new DrawHandler(), BorderLayout.CENTER);
         this.setVisible(true);
     }
@@ -37,7 +37,7 @@ public class DFAGraphics extends JFrame {
         distances = (1000 / size);
         this.setSize(1366, 768);
         this.setTitle(title);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.add(new DrawHandler(), BorderLayout.CENTER);
         this.setVisible(true);
     }

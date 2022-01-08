@@ -135,7 +135,9 @@ public class DFA {
     }
 
     public void printTable() {
+        System.out.println("---------------DFA TRANSITIONS TABLE-------------");
         for (DFAState ds : listStates) {
+            System.out.println("| ");
             if (ds.isStart()) {
                 System.out.print("->");
             } else if (ds.isFinal()) {
@@ -148,6 +150,7 @@ public class DFA {
                 }
             }
         }
+        System.out.println("-----------------------------------------------");
     }
 
     public void isValidString(String str) {
@@ -206,7 +209,7 @@ public class DFA {
             dfaMin.addState(DFAState.mergeStates(group));
         }
 
-        //System.out.println("[*] Creating δ_min\n");
+        System.out.println("[*] Creating δ_min\n");
         dfaMin.lambda = createLambda(dfaMin.getStates());
         System.out.println("DEBUG");
         System.out.println(dfaMin.getStates().size());
@@ -214,17 +217,22 @@ public class DFA {
         //System.out.println(dfaMin.lambda);
         //System.out.println(dfaMin.listStates);
 
-        //System.out.println("[*] Renaming States\n");
+        System.out.println("[*] Renaming States\n");
         dfaMin.renameStates();
         System.out.println(dfaMin.getStates().size());
 
-        //System.out.println("[*] Done\n");
+        System.out.println("[*] Done\n");
         dfaMin.sTree = sTree;
         dfaMin.regex = regex;
         return dfaMin;
     }
 
     public DFA getComplement(Set<String> universum) {
+        if (!universum.containsAll(this.alphabet)) {
+            System.out.println("---Input Alphabet has been expanded with Automata's alphabet---");
+            universum.addAll(this.alphabet);
+            System.out.println("Current alphabet: " + universum);
+        }
         DFA newDFA = new DFA(regex, sTree).minimize();
 
         newDFA.totalize(universum);
@@ -240,6 +248,11 @@ public class DFA {
     public DFA getTotal(Set<String> universum) {
         if (universum.equals(this.alphabet))
             return this;
+        if (!universum.containsAll(this.alphabet)) {
+            System.out.println("---Input Alphabet has been expanded with Automata's alphabet---");
+            universum.addAll(this.alphabet);
+            System.out.println("Current alphabet: " + universum);
+        }
         DFA newDFA = new DFA(regex, sTree).minimize();
         newDFA.totalize(universum);
         DFAState.resetIds();
