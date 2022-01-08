@@ -13,3 +13,6 @@ aa*|qq*
 (a***b**c*)*
 ((aaa)***(aa)**(a)*)*
 [1-9][a-h]\[1-9\]
+(b*|(b*ab*ab*)*) INTERSECTION WITH (b*|(b*abb*)*)
+((a|b)*c) MINUS (baac*)
+

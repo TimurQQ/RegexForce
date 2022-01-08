@@ -52,6 +52,10 @@ public class DFAState {
         return id;
     }
 
+    public void setTrap(boolean isTrap) {
+        this.isTrap = isTrap;
+    }
+
     public void setId(int newId) {
         this.id = newId;
     }
@@ -111,6 +115,10 @@ public class DFAState {
 
     public void setGood() {
         isGood = true;
+    }
+
+    public void setGood(boolean isGood) {
+        this.isGood = isGood;
     }
 
     public void setStart() {

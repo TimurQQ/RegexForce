@@ -25,7 +25,7 @@ public class Application {
             if (choiceA == 1) {
                 System.out.println("Enter the regEx in string format:-->");
                 str = console.readLine();
-                while (choiceB != 9) {
+                while (choiceB != 11) {
                     System.out.println(
                             "1.Generate Syntax Tree\n" +
                                     "2.Generate DFA transitions table\n" +
@@ -35,7 +35,9 @@ public class Application {
                                     "6.Get Complement of this Lang\n" +
                                     "7.Get Minimized Complement\n" +
                                     "8.Get minuzzzz.\n" +
-                                    "9.Exit"
+                                    "9.Check Totalitize DFA\n" +
+                                    "10.Check Intersection DFA a1 and DFA a2\n" +
+                                    "11.Exit"
                     );
                     choiceB = Integer.parseInt(console.readLine());
                     switch (choiceB) {
@@ -101,8 +103,28 @@ public class Application {
                             new DFAGraphics(a2, "DFA_2 (a2) Regex:\"" + "baac*" + "\"");
                             DFA c = BasicOperations.minus(a1, a2);
                             new DFAGraphics(c, "DFA_3 (a1\\a2) a1: \"" + "(a|b)*c" + "\" a2: \"" + "baac*\"" + " (minimized)");
+                            break;
                         }
                         case 9: {
+                            DFAState.resetIds();
+                            DFA automaton = new DFA(str);
+                            DFA dfaTotal = automaton.getTotal(Set.of(
+                                    "a", "b", "c", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+                            ));
+                            new DFAGraphics(dfaTotal, "DFA Totalized Regex:\"" + str + "\"" + " Universum: " + "\"a\", \"b\", \"c\", \"0\", \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\"");
+                            break;
+                        }
+                        case 10: {
+                            DFAState.resetIds();
+                            DFA a1 = new DFA("(b*|(b*ab*ab*)*)");
+                            new DFAGraphics(a1, "DFA 1 Minimized");
+                            DFA a2 = new DFA("(b*|(b*abb*)*)");
+                            new DFAGraphics(a2, "DFA 2 Minimized");
+                            DFA c = BasicOperations.intersection(a1, a2);
+                            new DFAGraphics(c, "INTERSECTION Regex1: " + "(b*|(b*ab*ab*)*);" + " Regex2: " + "(b*|(b*abb*)*)");
+                            break;
+                        }
+                        case 11: {
                             System.out.println("----BACK TO MAIN MENU----");
                             break;
                         }

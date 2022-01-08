@@ -258,6 +258,8 @@ public class DFA {
         for (DFAState p : getStates()) {
             for (String sym : universum) {
                 if (!p.existsTransitions(sym)) {
+                    p.setTrap(false);
+                    p.setGood(false);
                     lambda.addTransition(new Transition(p, sym, s.asSet()));
                     p.addTransition(s, sym);
                 }
