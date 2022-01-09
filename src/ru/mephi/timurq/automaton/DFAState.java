@@ -234,6 +234,17 @@ public class DFAState {
         return sb.toString();
     }
 
+    public void print() {
+        StringBuilder sb = new StringBuilder();
+        if (this.isStart()) {
+            sb.append("->");
+        } else if (this.isFinal()) {
+            sb.append("F_");
+        }
+        sb.append("Q").append(this.getId()).append("(").append(this.getName()).append("):");
+        sb.append("Nick: ").append(nickname);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

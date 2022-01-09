@@ -4,10 +4,7 @@ import ru.mephi.timurq.lang.OperatorsSet;
 import ru.mephi.timurq.lang.SymbolSet;
 import ru.mephi.timurq.regex.RegExp;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class SyntaxTree {
     private int leafNodeId = 0;
@@ -17,6 +14,10 @@ public class SyntaxTree {
     private final Stack<Character> opStack = new Stack<>();
     private Node root;
     private final Set<LeafNode> leaves = new HashSet<>();
+    private final Stack<Set<Integer>> notCompletedGroups = new Stack<>();
+    private final Set<Integer> used = new HashSet<>();
+    private final Map<Integer, Set<Integer>> tmpGroups = new HashMap<>();
+    private int cntOpen = 0;
 
     public SyntaxTree(RegExp regex) {
         String regexString = regex.toString();
@@ -47,11 +48,25 @@ public class SyntaxTree {
                 } else {
                     this.pushNode(Character.toString(regexString.charAt(i)));
                 }
+                for (Set<Integer> group : notCompletedGroups) {
+                    group.add(leafNodeId);
+                }
                 isEscaped = false;
-            } else if (opStack.isEmpty() || regexString.charAt(i) == '(') opStack.push(regexString.charAt(i));
+            } else if (opStack.isEmpty() || regexString.charAt(i) == '(') {
+                ++cntOpen;
+                opStack.push(regexString.charAt(i));
+                notCompletedGroups.push(new HashSet<>());
+            }
             else if (regexString.charAt(i) == ')') {
                 while (opStack.peek() != '(') this.operate();
                 this.operate();
+                Set<Integer> newGroup = notCompletedGroups.pop();
+                int maxCnt = cntOpen;
+                while(used.contains(maxCnt)) {
+                    maxCnt--;
+                }
+                tmpGroups.put(maxCnt, newGroup);
+                used.add(maxCnt);
             } else {
                 while (this.priority(opStack.peek(), regexString.charAt(i))) this.operate();
                 opStack.push(regexString.charAt(i));
@@ -81,6 +96,10 @@ public class SyntaxTree {
         } else if (root.getSymbol().charAt(0) == '*') {
             root.setNullable(true);
         }
+    }
+
+    public Map<Integer, Set<Integer>> getTmpGroups() {
+        return tmpGroups;
     }
 
     private void genFirstPos(Node root) {

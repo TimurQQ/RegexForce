@@ -16,6 +16,7 @@ public class DFA {
     private SyntaxTree sTree = null;
     private RegExp regex = null;
     private final OperatorsSet opSet = new OperatorsSet();
+    private final List<Set<Integer>> groups = new ArrayList<>();
 
     public DFA(RegExp regex, SyntaxTree sTree) {
         this.regex = regex;
@@ -153,19 +154,53 @@ public class DFA {
         System.out.println("-----------------------------------------------");
     }
 
+    public Map<Integer, StringBuilder> getGroups(String str) {
+        Map<Integer, StringBuilder > result = new HashMap<>();
+        for (Integer groupId: sTree.getTmpGroups().keySet()) {
+            result.put(groupId, new StringBuilder());
+        }
+        int index = 0;
+        for (int i = 0; i < str.length(); i++) {
+            DFAState start = listStates.get(index);
+            System.out.println("CHAR: " + str.charAt(i));
+            for (Integer groupId: sTree.getTmpGroups().keySet()) {
+                Set<Integer> names = new HashSet<>();
+                for (LeafNode leaf : sTree.getLeaves()) {
+                    if (sTree.getTmpGroups().get(groupId).contains(leaf.getId()) && start.getName().contains(leaf.getId()) && leaf.getSymbol().equals(Character.toString(str.charAt(i)))) {
+                        names.add(leaf.getId());
+                    }
+                }
+                System.out.println("GROUP: " + groupId);
+                System.out.println(names);
+                if (!names.isEmpty()) {
+                    result.get(groupId).append(str.charAt(i));
+                }
+            }
+            DFAState transition = start.getTransition(Character.toString(str.charAt(i)));
+            index = listStates.indexOf(transition);
+            //System.out.println("Q" + listStates.get(tmpIndex).getId() + "," + str.charAt(i) + " -> Q" + listStates.get(index).getId());
+            if (i == str.length() - 1 && listStates.get(index).isFinal()) {
+                System.out.println("STRING ACCEPTED");
+            }
+        }
+        System.out.println("STRING REJECTED");
+        return result;
+    }
+
     public void isValidString(String str) {
         int index = 0, i, tmpIndex;
         for (i = 0; i < str.length(); i++) {
-            DFAState temp = listStates.get(index).getTransition(Character.toString(str.charAt(i)));
+            DFAState start = listStates.get(index);
+            DFAState transition = start.getTransition(Character.toString(str.charAt(i)));
             tmpIndex = index;
-            index = listStates.indexOf(temp);
+            index = listStates.indexOf(transition);
             System.out.println("Q" + listStates.get(tmpIndex).getId() + "," + str.charAt(i) + " -> Q" + listStates.get(index).getId());
             if (i == str.length() - 1 && listStates.get(index).isFinal()) {
                 System.out.println("STRING ACCEPTED");
                 return;
             }
         }
-        System.out.println("STRING REJECTED");
+
     }
 
     public List<DFAState> getStates() {

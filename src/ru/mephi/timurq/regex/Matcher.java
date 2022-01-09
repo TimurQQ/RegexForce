@@ -3,6 +3,8 @@ package ru.mephi.timurq.regex;
 import ru.mephi.timurq.automaton.DFA;
 import ru.mephi.timurq.automaton.DFAState;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.MatchResult;
 
 public class Matcher implements MatchResult {
@@ -14,6 +16,7 @@ public class Matcher implements MatchResult {
 
     private final DFA automaton;
     private final CharSequence chars;
+    private final List<MatchGroup> groups = new ArrayList<>();
 
     private int matchStart = -1;
     private int matchEnd = -1;
@@ -70,11 +73,21 @@ public class Matcher implements MatchResult {
         }
         if (match_start != -1) {
             setMatch(match_start, match_end);
+            groups.add(new MatchGroup(match_start, match_end, group()));
             return true;
         } else {
             setMatch(-2, -2);
             return false;
         }
+    }
+
+    public boolean findAll() {
+        boolean result = false;
+        while (find()) {
+            groups.add(new MatchGroup(matchStart, matchEnd, group()));
+            result = true;
+        }
+        return result;
     }
 
     private void setMatch(final int matchStart, final int matchEnd) throws IllegalArgumentException {
@@ -97,38 +110,35 @@ public class Matcher implements MatchResult {
         return chars;
     }
 
-    public int end() throws IllegalStateException {
+    public int end() {
         matchGood();
         return matchEnd;
     }
 
-    public int end(final int group) throws IndexOutOfBoundsException, IllegalStateException {
-        onlyZero(group);
-        return end();
+    public int end(final int group) {
+        return groups.get(group).matchEnd;
     }
 
-    public String group() throws IllegalStateException {
+    public String group() {
         matchGood();
         return chars.subSequence(matchStart, matchEnd).toString();
     }
 
-    public String group(final int group) throws IndexOutOfBoundsException, IllegalStateException {
-        onlyZero(group);
-        return group();
+    public String group(final int group) {
+        return groups.get(group).value;
     }
 
     public int groupCount() {
-        return 0;
+        return groups.size();
     }
 
-    public int start() throws IllegalStateException {
+    public int start() {
         matchGood();
         return matchStart;
     }
 
-    public int start(int group) throws IndexOutOfBoundsException, IllegalStateException {
-        onlyZero(group);
-        return start();
+    public int start(int group) {
+        return groups.get(group).matchStart;
     }
 
     public MatchResult toMatchResult() {
@@ -136,12 +146,6 @@ public class Matcher implements MatchResult {
         match.matchStart = this.matchStart;
         match.matchEnd = this.matchEnd;
         return match;
-    }
-
-    private static void onlyZero(final int group) throws IndexOutOfBoundsException {
-        if (group != 0) {
-            throw new IndexOutOfBoundsException("The only group supported is 0.");
-        }
     }
 
     private void matchGood() throws IllegalStateException {
