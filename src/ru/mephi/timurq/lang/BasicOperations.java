@@ -1,6 +1,9 @@
 package ru.mephi.timurq.lang;
 
 import ru.mephi.timurq.automaton.*;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class BasicOperations {
@@ -60,6 +63,11 @@ public class BasicOperations {
             }
         }
         return result;
+    }
+
+    public static String getRegexFromAutomata(DFA a) throws IOException {
+        a.writeLangToFile();
+        return RegexGenerator.generateFromLangFile(new File("DFA.txt"));
     }
 
 }

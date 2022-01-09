@@ -16,3 +16,19 @@ aa*|qq*
 (b*|(b*ab*ab*)*) INTERSECTION WITH (b*|(b*abb*)*)
 ((a|b)*c) MINUS (baac*)
 
+
+"((ab)*)c*" --- "abababababccc"
+"(ab|aa|b|ca|ddddd)(c|d|cd)" --- "abcd"
+
+
+S=Q0
+A=Q0
+E=a,b
+Q=Q0,Q1,Q2
+Q0,a=Q1
+Q1,b=Q0
+Q0,b=Q2
+Q2,a=Q0
+Q2,b=Q1
+
+((ba|(a|bb)b))*

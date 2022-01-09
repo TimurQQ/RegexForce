@@ -2,14 +2,17 @@ package ru.mephi.timurq;
 
 import ru.mephi.timurq.automaton.DFA;
 import ru.mephi.timurq.automaton.DFAGraphics;
+import ru.mephi.timurq.lang.BasicOperations;
 import ru.mephi.timurq.regex.Matcher;
 import ru.mephi.timurq.regex.Pattern;
 import ru.mephi.timurq.regex.RegExp;
 import ru.mephi.timurq.syntaxtree.SyntaxTree;
 
+import java.io.IOException;
+
 public class Testing {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         RegExp regex = new RegExp("(ab|aa|b|ca|ddddd)(c|d|cd)");//RegExp("(a|b)*c");
         //System.out.println(regex);
         SyntaxTree sTree = new SyntaxTree(regex);
@@ -40,5 +43,9 @@ public class Testing {
 //        System.out.println(matcher.groupCount());
 //        System.out.println(matcher.group(0));
 //        System.out.println(matcher.group(1));
+        String reString = "((ab|b(bb|a)))*";
+        DFA langDFA = new DFA(reString);
+        String guessedRegex = BasicOperations.getRegexFromAutomata(langDFA);
+        System.out.println(guessedRegex);
     }
 }

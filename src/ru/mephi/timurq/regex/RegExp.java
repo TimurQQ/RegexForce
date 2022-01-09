@@ -1,7 +1,13 @@
 package ru.mephi.timurq.regex;
 
+import ru.mephi.timurq.automaton.DFA;
 import ru.mephi.timurq.lang.OperatorsSet;
 import ru.mephi.timurq.lang.SymbolSet;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class RegExp {
     private final String initialValue;

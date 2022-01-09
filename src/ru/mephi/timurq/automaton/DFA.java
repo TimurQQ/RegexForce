@@ -6,6 +6,11 @@ import ru.mephi.timurq.regex.RegExp;
 import ru.mephi.timurq.syntaxtree.LeafNode;
 import ru.mephi.timurq.syntaxtree.SyntaxTree;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class DFA {
@@ -226,6 +231,44 @@ public class DFA {
             if ((i == alphabet.size()) && ds.isFinal()) ds.setGood();
             if ((i == alphabet.size()) && !ds.isFinal()) ds.setTrap();
         }
+    }
+
+    public void writeLangToFile() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        Set<DFAState> finalStates = getFinalStates();
+        DFAState startState = getStartState();
+        sb.append("S=").append("Q").append(startState.getId()).append("\n");
+        sb.append("A=");
+        for (DFAState finalState : finalStates) {
+            sb.append("Q").append(finalState.getId()).append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("\n");
+        sb.append("E=");
+        for (String sym : getAlphabet()) {
+            sb.append(sym).append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("\n");
+        sb.append("Q=");
+        for (DFAState ds : listStates) {
+            sb.append("Q").append(ds.getId()).append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("\n");
+        for (DFAState ds : listStates) {
+            for (String sym : alphabet) {
+                sb.append("Q").append(ds.getId());
+                if (ds.existsTransitions(sym)) {
+                    sb.append(",").append(sym).append("=");
+                    sb.append("Q").append(ds.getTransition(sym).getId());
+                    sb.append("\n");
+                }
+            }
+        }
+        PrintWriter writer = new PrintWriter("DFA.txt", StandardCharsets.UTF_8);
+        writer.print(sb);
+        writer.close();
     }
 
     public DFA minimize() {
