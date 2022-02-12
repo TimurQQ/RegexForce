@@ -53,7 +53,7 @@ public class Matcher implements MatchResult {
         int l = getChars().length();
         while (begin < l) {
             int index = 0;
-            System.out.println("START:");
+            //System.out.println("START:");
             for (int i = begin; i < l; i++) {
                 DFAState new_state = automaton.getStates().get(index).getTransition(Character.toString(getChars().charAt(i)));
                 if (new_state == null) {

@@ -167,7 +167,7 @@ public class DFA {
         int index = 0;
         for (int i = 0; i < str.length(); i++) {
             DFAState start = listStates.get(index);
-            System.out.println("CHAR: " + str.charAt(i));
+            //System.out.println("CHAR: " + str.charAt(i));
             for (Integer groupId: sTree.getTmpGroups().keySet()) {
                 Set<Integer> names = new HashSet<>();
                 for (LeafNode leaf : sTree.getLeaves()) {
@@ -175,8 +175,8 @@ public class DFA {
                         names.add(leaf.getId());
                     }
                 }
-                System.out.println("GROUP: " + groupId);
-                System.out.println(names);
+                //System.out.println("GROUP: " + groupId);
+                //System.out.println(names);
                 if (!names.isEmpty()) {
                     result.get(groupId).append(str.charAt(i));
                 }

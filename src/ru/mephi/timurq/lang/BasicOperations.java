@@ -8,7 +8,7 @@ import java.util.*;
 
 public class BasicOperations {
     static public DFA minus(DFA a1, DFA a2) {
-        if (a1.isEmpty() || a1 == a2)
+        if (a1.isEmpty() || a1.equals(a2))
             return new DFA();
         if (a2.isEmpty())
             return a1;
